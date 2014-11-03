@@ -44,3 +44,8 @@ Cannon only turns left, nothing is coming out on the rightTurnPin
 9-13-2014 Added the LCD screen, it's setup up on a "hello world" right now, I still need to add useful info
 
 10-9-2014 I think I've got the sendData function working correctly.
+
+11-3-2014 - Working on I2C communication from node.js
+q<F4>
+q
+

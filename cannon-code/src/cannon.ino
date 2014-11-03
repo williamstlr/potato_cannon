@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <LiquidCrystal595.h>    // include the shiftregister LCD library
 
-//I2C stuff
+////I2C stuff
 #define i2c_data 7
 byte data[i2c_data];
 byte cur_data_index;
