@@ -1,6 +1,5 @@
-.build/uno/LiquidCrystal595/LiquidCrystal595.d .build/uno/LiquidCrystal595/LiquidCrystal595.o: \
- /usr/share/arduino/libraries/LiquidCrystal595/LiquidCrystal595.cpp \
- /usr/share/arduino/libraries/LiquidCrystal595/LiquidCrystal595.h \
+.build/uno/LiquidCrystal595/LiquidCrystal595.d .build/uno/LiquidCrystal595/LiquidCrystal595.o: lib/LiquidCrystal595/LiquidCrystal595.cpp \
+ lib/LiquidCrystal595/LiquidCrystal595.h \
  /usr/share/arduino/hardware/arduino/cores/arduino/Print.h \
  /usr/share/arduino/hardware/arduino/cores/arduino/WString.h \
  /usr/share/arduino/hardware/arduino/cores/arduino/Printable.h \

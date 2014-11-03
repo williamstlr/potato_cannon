@@ -1,4 +1,4 @@
-.build/uno/src/sketch.d .build/uno/src/sketch.o: .build/uno/src/sketch.cpp \
+.build/uno/src/cannon.d .build/uno/src/cannon.o: .build/uno/src/cannon.cpp \
  /usr/share/arduino/hardware/arduino/cores/arduino/Arduino.h \
  /usr/share/arduino/hardware/arduino/cores/arduino/binary.h \
  /usr/share/arduino/hardware/arduino/cores/arduino/WCharacter.h \
