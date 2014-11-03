@@ -103,7 +103,7 @@ int printMovementDirection  =  0;    //1 for on, 0 for off
 int controllerInputDebug    =  0;
 int printXYLocation         =  0;
 int printBounceForce        =  0;
-int wirePrintReceived       =  0;
+int wirePrintReceived       =  1;
 
 void setup()
 {
@@ -329,17 +329,7 @@ void printFuelTimerDebug()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Read Inputs
 void readInputs()
-{/*
-  horizontalMotion    =  ((map(Wire.read(),0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
- verticalMotion      =  (((Wire.read())-verticalHalf)*2);
- fire                =  Wire.read();
- a                  =  Wire.read();
- b                  =  Wire.read();
- y                  =  Wire.read();
- x                  =  Wire.read();
- panLocation       =  analogRead(sensorPinPan);
- verticalMotion  =  constrain(verticalMotion,-255,255);
- */
+{
   while(Wire.available())
   {
 
@@ -349,9 +339,7 @@ void readInputs()
     {
       cur_data_index = 0;
 
-      //horizontalMotion  =  data[0];
       horizontalMotion    =  ((map(data[0],0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
-      //verticalMotion    =  data[1];
       verticalMotion      =  constrain((((data[1])-verticalHalf)*2),-255,255);
       fire              =  data[2];
       a                 =  data[3];
@@ -371,16 +359,11 @@ void readInputs()
       {
         horizontalMotion = 0;
       };
-      /*
-      if (verticalMotion >= -15 && verticalMotion <=15)
-      {
-        verticalMotion = 0;
-      };
-      */
-    }
+    }//end cur_data_index if
 
-  }
-}
+  }//End wire.available while loop
+}//end readInputs
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void keepOutputPinsLow()
@@ -579,8 +562,6 @@ void sendData()
   }
   
   Wire.write(sendDataBuffer[sendDataPosition++]);
-  //  Wire.write(sendDataBuffer[0]);
-  //sendDataPosition++;
  
  
   
