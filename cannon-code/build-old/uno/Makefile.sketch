@@ -1,0 +1,14 @@
+
+
+
+
+
+.build/uno/src/cannon.cpp : src/cannon.ino
+	@mkdir -p .build/uno/src
+	@echo [93msrc/cannon.ino[0m
+	@/usr/local/bin/ino preproc  -o $@ $^
+
+
+all : .build/uno/src/cannon.cpp
+	@true
+
