@@ -1,0 +1,21 @@
+var i2c = require('i2c');
+var device1 = new i2c(0x18, {device: '/dev/i2c-1', debug: false});
+device1.setAddress(0x4);
+
+
+//var output = device1.readByte(function(err, res) {return res; });
+//var output2 = device1.readByte(function(err, res) {return res; });
+
+//printOutput();
+
+//device1.writeByte(115,function(err){});
+
+console.log(device1.readByte(function(err, res) {return res; }));
+console.log(device1.readByte(function(err, res) {return res; }));
+
+while (1)
+{
+	console.log(device1.readByte(function(err, res) {return res; }));
+	console.log(device1.readByte(function(err, res) {return res; }));
+
+}

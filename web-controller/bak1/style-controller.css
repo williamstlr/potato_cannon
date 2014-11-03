@@ -1,0 +1,61 @@
+body
+{
+	background-color:#335C33;
+}
+
+h1
+{
+	color: blue;
+}
+
+#mainWindow
+{
+	margin-left:auto;
+	margin-right:auto;
+	width:70%;
+	border-style:solid;
+	border-width:5px;
+	border-color:black;
+}
+
+#controls
+{
+	float:right;
+}
+
+#up
+{
+	position:absolue;
+	top: 0px;
+	left:
+}
+
+#left
+{
+	position:relative;
+	left:5px;
+}
+
+#down
+{
+	position:relative;
+	botton:5px;
+}
+
+#right
+{
+	position:relative;
+	right:5px;
+}
+
+#liveImage
+{
+ -moz-transform: scaleY(-1);
+    -webkit-transform: scaleY(-1);
+    -o-transform: scaleY(-1);
+    transform: scaleY(-1);
+    -ms-filter: flipv; /*IE*/
+    filter: flipv; /*IE*/
+    top: 1px; position: relative;
+}
+

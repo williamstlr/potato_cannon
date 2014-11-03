@@ -1,0 +1,4 @@
+sudo service apache2 stop
+
+ /usr/local/src/mjpg-streamer-code-182/mjpg-streamer/mjpg_streamer -i '/usr/local/src/mjpg-streamer-code-182/mjpg-streamer/input_uvc.so -d /dev/video0 -r 640x480 -f 15' -o '/usr/local/src/mjpg-streamer-code-182/mjpg-streamer/output_http.so -w /var/www/ -p 8080'
+

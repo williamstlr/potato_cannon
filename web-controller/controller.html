@@ -1,0 +1,39 @@
+<html>
+<head>
+<script type='text/javascript' src='./jquery-2.1.1.min.js'></script>
+<link rel="stylesheet" type="text/css" href="style-controller.css">
+
+
+
+</head>
+
+<body>
+
+<div id="mainWindow">
+	<center><h2>Potato Cannon</h2></center>
+
+<div id="liveImage" class='streamingVideo'>
+	<center>
+		<img src="http://10.0.0.131:8080/?action=stream" width="320">
+	</center>
+</div> <!--end liveImage div-->
+
+
+<div id="slider">
+	<input class="bar" type="range" id="rangeinput" value="50" onchange="rangevalue.value=value"/>
+	<span class="highlight"></span>
+	<output id="rangevalue">50</output>
+</div><!-- end slider div -->
+
+
+<div id="controls">
+	<button id="up">Up</button>
+	<button id="left">Left</button>
+	<button id="down">Down</button>
+	<button id="right">Right</button>
+</div> <!-- end controls div -->
+
+
+</div> <!-- end mainWindow div -->
+</body>
+</html>

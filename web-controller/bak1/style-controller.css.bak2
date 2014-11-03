@@ -1,0 +1,73 @@
+body
+{
+	background-color:#335C33;
+}
+
+h1
+{
+	color: blue;
+}
+
+#mainWindow
+{
+	position:relative;
+	margin-left:auto;
+	margin-right:auto;
+	width:1000px;
+	border-style:solid;
+	border-width:5px;
+	border-color:black;
+	padding-bottom:50px;
+}
+
+#controls
+{
+	position:absolute;
+	border-style:solid;
+	border-width:3px;
+	border-color:black;
+	width:175px;
+	height:175px;
+	right:-3px;
+	bottom:-3px;
+}
+
+#up
+{
+	position:absolute;
+	bottom: 100px;
+	right: 70px;
+}
+
+#left
+{
+	position:absolute;
+	right:110px;
+	bottom:70px;
+}
+
+#down
+{
+	position:absolute;
+	bottom:40px;
+	right: 60px;
+}
+
+#right
+{
+	position:absolute;
+	right:15px;
+	bottom:70px;
+}
+
+#liveImage
+{
+ -moz-transform: scaleY(-1);
+    -webkit-transform: scaleY(-1);
+    -o-transform: scaleY(-1);
+    transform: scaleY(-1);
+    -ms-filter: flipv; /*IE*/
+    filter: flipv; /*IE*/
+    top: 1px; position: relative;
+}
+
