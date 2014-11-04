@@ -7,10 +7,11 @@ var serverUrl = "0.0.0.0";
 var http = require("http");
 var path = require("path"); 
 var fs = require("fs"); 		
+var io = require("socket.io");
 
 console.log("Starting web server at " + serverUrl + ":" + port);
 
-http.createServer( function(req, res) {
+var server = http.createServer( function(req, res) {
 
 	var now = new Date();
 
@@ -62,3 +63,4 @@ function getFile(localPath, res, mimeType) {
 	});
 }
 
+var io.listen();
