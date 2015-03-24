@@ -24,10 +24,10 @@ Motor Pin Connections
  */
 
 //Settings that can be changed
-int horizontalMaxSpeed    =  50;
+int horizontalMaxSpeed    =  75;
 int verticalMaxSpeed      =  255;
 long fanRunTime      =  10000;  //How long to run the fan for after the button is pressed
-float fuelFillTime    =  4000;  //How long to keep the fuel valve open after the button is pressed.
+float fuelFillTime    =  2000;  //How long to keep the fuel valve open after the button is pressed.
 int leftTurnMax      =  850;   //How far the cannon can turn left
 int rightTurnMax     =  150;   //How far the cannon can turn right
 int tiltDownMax      =  875;
@@ -644,7 +644,7 @@ void lcdMenu()
               
               if (fuelFillTime > 6000)
               {
-                fuelFillTime = 2000;
+                fuelFillTime = 1000;
               }
             }
           }//end button state compare
