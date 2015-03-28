@@ -54,7 +54,7 @@ LiquidCrystal595 lcd(lcdDataPin,lcdLatchPin,lcdClockPin);     // datapin, latchp
 
 //Variables for menu
 int menuCurrentScreen    =  0;
-int menuNumberOfScreens  =  6;
+int menuNumberOfScreens  =  7;
 
 //Some variables for keeping track of timers
 long previousFanMillis  =  0;
@@ -97,13 +97,17 @@ int verticalNoiseThreshold    =  80;
 int  sendDataPosition = 0;
 int  sendDataBuffer[sendDataNumber];
 
+//Angle calculation variables
+int verticalAngle = 0;
+int horizontalAngle = 0;
+
 
 //debugging
 int printMovementDirection  =  0;    //1 for on, 0 for off
 int controllerInputDebug    =  0;
 int printXYLocation         =  0;
 int printBounceForce        =  0;
-int wirePrintReceived       =  1;
+int wirePrintReceived       =  0;
 
 void setup()
 {
@@ -202,6 +206,15 @@ void receiveEvent(int howMany) //This is what runs when the I2C connection is UP
   fanTimer();
   fuelTimer();
   i2cDetected = 1;
+  //(0-100)(-1)
+  //(100-100)(-1)
+  
+  //int invertVertical = (map(panLocation,tiltDownMax,tiltUpMax,0,100)-100)-1;
+  //verticalAngle = map(verticalAngle,0,100,36,60);
+  //horizontalAngle = 0;
+  //Serial.print(invertVertical);
+  
+  
 }// End of receiveEvent loop
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -750,7 +763,25 @@ if (menuCurrentScreen == 5)
  
   }//end menu 6
   
+  if (menuCurrentScreen == 7)
+  {
+ 
   
+  //panLocation
+  
+  
+  //tiltLocation
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("V angle = ");
+  lcd.print(verticalAngle);
+  //lcd.print(" degrees");
+  lcd.setCursor(0,1);
+  lcd.print("H angle = ");
+  lcd.print(horizontalAngle);
+  //lcd.print(" degrees");
+ 
+  }//end menu 7
   
   
   
