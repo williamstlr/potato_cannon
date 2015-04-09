@@ -153,8 +153,6 @@ void loop()
   sendDataBuffer[1] = mappedTiltLocation;
   
   
-  //sendDataBuffer[0] = map(panLocation,0,1023,0,127);
-  //sendDataBuffer[1] = map(tiltLocation,0,1023,0,127);
   
 
   
