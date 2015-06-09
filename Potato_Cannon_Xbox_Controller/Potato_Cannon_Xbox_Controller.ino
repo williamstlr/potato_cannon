@@ -18,15 +18,17 @@ int  xPin                           =  2;
   int  writeValuesToSerialDebug  =  1; //doesn't work when the wire-write is enabled
   int calibrateThumbSticks       =  0;
   
-  //Initialize a bunch of variables
+  //Initialize variables for data to be sent. The are bytes because i2c specifcally requests bytes.
+  //if an int data type is used, two bytes will be sent for every value and it will really screw
+  //with the receiving end of the i2c transaction
   byte thumbstickRightHorizontalData  =  0;
   byte thumbstickRightVerticalData    =  0;
-  int rightTriggerData               =  0;
+  byte rightTriggerData               =  0;
   
-  int a  =  0;
-  int b  =  0;
-  int y  =  0;
-  int x  =  0;
+  byte a  =  0;
+  byte b  =  0;
+  byte y  =  0;
+  byte x  =  0;
 
 void setup()
 {
@@ -48,7 +50,7 @@ void setup()
 void sendData()
 {
     //Wire.beginTransmission(); // transmit to device #4
-    //Serial.println("Writing to i2c bus");
+    //Serial.println("Writing to i2c bus...");
     Wire.write(thumbstickRightHorizontalData);              // sends one byte  
     Wire.write(thumbstickRightVerticalData);
     Wire.write(rightTriggerData);
@@ -64,16 +66,16 @@ void sendData()
 void loop()
 {
   delay(100);
-  digitalWrite(12,HIGH); //Turns the green light on the front on
+  digitalWrite(12,HIGH); //Turns the green status light on controller on
 
   thumbstickRightHorizontalData  =  constrain(map(analogRead(thumbstickRightHorizontalPin),200,850,0,horizontalMaxSpeed),0,horizontalMaxSpeed);
   thumbstickRightVerticalData    =  constrain(map(analogRead(thumbstickRightVerticalPin),210,870,0,verticalMaxSpeed),0,verticalMaxSpeed);
-  int rightTriggerData               =  constrain(map(analogRead(triggerRight),130,810,0,255),0,255);
+  rightTriggerData               =  constrain(map(analogRead(triggerRight),130,810,0,255),0,255);
   
-  int a  =  digitalRead(aPin);
-  int b  =  digitalRead(bPin);
-  int y  =  digitalRead(yPin);
-  int x  =  digitalRead(xPin);
+  a  =  digitalRead(aPin);
+  b  =  digitalRead(bPin);
+  y  =  digitalRead(yPin);
+  x  =  digitalRead(xPin);
   
   
   /*
