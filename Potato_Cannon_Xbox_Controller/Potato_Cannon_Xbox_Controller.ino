@@ -20,7 +20,7 @@ int  xPin                           =  2;
 
 void setup()
 {
-  Wire.begin(); // join i2c bus (address optional for master)
+  Wire.begin(1); // join i2c bus (address optional for master)
   pinMode(thumbstickRightHorizontalPin,INPUT);
   pinMode(thumbstickRightVerticalPin,INPUT);
   pinMode(triggerRight,INPUT);
@@ -30,17 +30,28 @@ void setup()
   pinMode(xPin,INPUT_PULLUP);
   pinMode(12,OUTPUT);
   Serial.begin(9600);
+  Wire.onRequest(sendData)
+}
+
+void sendData()
+{
+    //Wire.beginTransmission(); // transmit to device #4
+    Wire.write(thumbstickRightHorizontalData);              // sends one byte  
+    Wire.write(thumbstickRightVerticalData);
+    Wire.write(rightTriggerData);
+    Wire.write(a);
+    Wire.write(b);
+    Wire.write(y);
+    Wire.write(x);
+    //Wire.endTransmission();    // stop transmitting
 }
 
 
 void loop()
 {
-  digitalWrite(12,HIGH);
-  /*int horizontalMaxSpeed    =  255;
-  int horizontalHalf        =  horizontalMaxSpeed/2;
-  int verticalMaxSpeed      =  255;
-  int verticalHalf          =  verticalMaxSpeed/2;
-  */
+  delay(100);
+  digitalWrite(12,HIGH); //Turns the green light on the front on
+
   int thumbstickRightHorizontalData  =  constrain(map(analogRead(thumbstickRightHorizontalPin),200,850,0,horizontalMaxSpeed),0,horizontalMaxSpeed);
   int thumbstickRightVerticalData    =  constrain(map(analogRead(thumbstickRightVerticalPin),210,870,0,verticalMaxSpeed),0,verticalMaxSpeed);
   int rightTriggerData               =  constrain(map(analogRead(triggerRight),130,810,0,255),0,255);
@@ -50,6 +61,8 @@ void loop()
   int y  =  digitalRead(yPin);
   int x  =  digitalRead(xPin);
   
+  
+  /*
   //Write values to the Wire line
   if(writeToWire == 1)
   {
@@ -63,7 +76,7 @@ void loop()
     Wire.write(x);
     Wire.endTransmission();    // stop transmitting
   }
-  
+  */
   if(writeValuesToSerialDebug == 1)
   {
     Serial.print(thumbstickRightHorizontalData);
@@ -91,5 +104,5 @@ void loop()
   }
 
   //x++;
-  delay(100);
+  
 }

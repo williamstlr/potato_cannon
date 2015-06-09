@@ -113,7 +113,7 @@ int wirePrintReceived       =  1;
 void setup()
 {
 
-  Wire.begin(4);                // join i2c bus with address #4
+  Wire.begin();                // join i2c bus as the master
   Wire.onReceive(receiveEvent); // register event
   Wire.onRequest(sendData);
   Serial.begin(9600);
@@ -153,7 +153,7 @@ void loop()
   sendDataBuffer[0] = mappedPanLocation;
   sendDataBuffer[1] = mappedTiltLocation;
   
-  
+  Wire.requestFrom(1,7);
   
 
   
@@ -195,6 +195,8 @@ void loop()
 void receiveEvent(int howMany) //This is what runs when the I2C connection is UP
 {
   readInputs();
+  
+  /*
   keepOutputPinsLow();
   overRotationBounce();
   moveCannon();
@@ -205,6 +207,9 @@ void receiveEvent(int howMany) //This is what runs when the I2C connection is UP
   fanTimer();
   fuelTimer();
   i2cDetected = 1;
+  */
+  
+  
   //(0-100)(-1)
   //(100-100)(-1)
   
