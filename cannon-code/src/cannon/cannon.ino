@@ -4,15 +4,15 @@
 ////I2C stuff
 //#define i2c_data 7
 int i2c_data_length = 0;
-byte data[24];
+byte data[24];    //These are bytes because I2C works with individual bytes per transaction
 byte data_index;
 byte state;
 int i2cDetected =0;
 
-#define i2c_write_data 2
+#define i2c_write_data 2    //Number of bytes that I want to send
 byte writeData[i2c_write_data];
 byte writeDataIndex;
-byte mappedPanLocation;
+byte mappedPanLocation;    //Bytes to work with I2C
 byte mappedTiltLocation;
 
 
@@ -112,27 +112,23 @@ int wirePrintReceived       =  1;
 
 void setup()
 {
-
+  //Communication setup
   Wire.begin();                // join i2c bus as the master
-  Wire.onReceive(receiveEvent); // register event
-  Wire.onRequest(sendData);
+  Wire.onReceive(receiveEvent); // register event                  **Remove me** No longer needed now that this is the I2C Master
+  Wire.onRequest(sendData);                                        //This probably isn't needed either
   Serial.begin(9600);
   Serial.println("Serial connection established");
   Serial.println("waiting for data...");
 
-
+  //Pin setup
   pinMode(sensorPinPan,INPUT);
   pinMode(fuelPin,OUTPUT);
   pinMode(fanPin,OUTPUT);
-  //pinMode(sensorPinTilt,INPUT);
-
-  //enable pin setup
+  //pinMode(sensorPinTilt,INPUT);    //Why is this commented out?
   pinMode(motorPinLeft,OUTPUT);
   pinMode(motorPinRight,OUTPUT);
   pinMode(motorPinUp,OUTPUT);
   pinMode(motorPinDown,OUTPUT);
-
-  //Ignition out setup
   pinMode(ignitionOutput,OUTPUT);
   
   //LCD setup
@@ -145,29 +141,27 @@ void loop()
 {
   delay(10);
   
-  panLocation       =  analogRead(sensorPinPan);
-  tiltLocation      =  analogRead(sensorPinTilt);
+  //This can probably be moved to it's own function                    *Change me*
+  panLocation       =  analogRead(sensorPinPan);   //Get pan value
+  tiltLocation      =  analogRead(sensorPinTilt);  //Get tilt value
   
-  mappedPanLocation   = constrain(map(panLocation,rightTurnMax,leftTurnMax,0,127),0,127);
-  mappedTiltLocation  = constrain(map(tiltLocation,tiltUpMax,tiltDownMax,0,127),0,127);
+  mappedPanLocation   = constrain(map(panLocation,rightTurnMax,leftTurnMax,0,127),0,127);  //Do some math to get the pan value within an acceptable range, it should be
+  mappedTiltLocation  = constrain(map(tiltLocation,tiltUpMax,tiltDownMax,0,127),0,127);    //a value 0-255 so that it will fit in an I2C transaction
   
   //Fill I2C send buffer
   sendDataBuffer[0] = mappedPanLocation;
   sendDataBuffer[1] = mappedTiltLocation;
   
+  //Request 7-bytes from device 1 on the I2C bus
   Wire.requestFrom(1,7);
-  
-    int numBytesInTransaction = Wire.available();
-    i2c_data_length = Wire.available();
-    //Serial.print("Number of bytes in transaction: ");
-    //Serial.println(numBytesInTransaction);
+  i2c_data_length = Wire.available(); //This determines the number of bytes coming down the I2C pipe, needed
   
   while(Wire.available())
   {
     
    
    //int someData = Wire.read();
-   //Serial.println("Something is coming through"); 
+   //Serial.println("Something is coming through");                         *Remove me*
    //Serial.println(someData);
    
    
@@ -185,28 +179,26 @@ void loop()
       y                 =  data[5];
       x                 =  data[6];
       
-      
-      if (verticalMotion >= -100 && verticalMotion <= 100)
+      //Filters out some controller noise
+      if (verticalMotion >= -100 && verticalMotion <= 100)    
       {
         verticalMotion = 0;
       };
       
-      
-      
-      if (horizontalMotion >= -20 && horizontalMotion <=20)
+      //Filters out some controller noise
+      if (horizontalMotion >= -20 && horizontalMotion <=20)  
       {
         horizontalMotion = 0;
       };
+      
     }//end data_index if
-   
-   
-   
-   
-   
-  }
+    
+  }//end while wire.available
 
   miscDebugging();
-  if (i2cDetected == 0)
+  
+  
+  if (i2cDetected == 0)                            //*This needs work*
   {
     lcd.clear();
     lcd.setCursor(0,0);
@@ -224,7 +216,7 @@ void loop()
  
   
 
-  ////////////////////Debugging////////////////////
+  ////////////////////Debugging////////////////////                                  **TODO, move all debugging functions to another file**
   //////////////Uncomment to Enable////////////////
 
   //Print running timers for the Fuel
@@ -241,12 +233,12 @@ void loop()
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }//End of loop()
-void receiveEvent(int howMany) //This is what runs when the I2C connection is UP
+void receiveEvent(int howMany) //This is what runs when the I2C connection is UP  *Remove this whole function once everything is migrated to loop()*
 {
   readInputs();
   
   /*
-  keepOutputPinsLow();
+  keepOutputPinsLow();                                                **TODO, move all these into loop()**
   overRotationBounce();
   moveCannon();
   watchFire();
