@@ -35,7 +35,6 @@ void setup()
 
 void loop()
 {
-  delay(200);
   digitalWrite(12,HIGH);
   /*int horizontalMaxSpeed    =  255;
   int horizontalHalf        =  horizontalMaxSpeed/2;
@@ -92,5 +91,5 @@ void loop()
   }
 
   //x++;
-  
+  delay(200);
 }
