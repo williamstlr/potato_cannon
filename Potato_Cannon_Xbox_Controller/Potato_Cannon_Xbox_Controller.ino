@@ -14,9 +14,19 @@ int  xPin                           =  2;
   int verticalMaxSpeed       =  255;
   int verticalHalf      =  verticalMaxSpeed/2;
   
-  int  writeToWire               =  1;
-  int  writeValuesToSerialDebug  =  0; //doesn't work when the wire-write is enabled
+  int  writeToWire               =  0;
+  int  writeValuesToSerialDebug  =  1; //doesn't work when the wire-write is enabled
   int calibrateThumbSticks       =  0;
+  
+  //Initialize a bunch of variables
+  byte thumbstickRightHorizontalData  =  0;
+  byte thumbstickRightVerticalData    =  0;
+  int rightTriggerData               =  0;
+  
+  int a  =  0;
+  int b  =  0;
+  int y  =  0;
+  int x  =  0;
 
 void setup()
 {
@@ -30,12 +40,15 @@ void setup()
   pinMode(xPin,INPUT_PULLUP);
   pinMode(12,OUTPUT);
   Serial.begin(9600);
-  Wire.onRequest(sendData)
+  Serial.println("Serial connection established");
+  Serial.println("waiting for data...");
+  Wire.onRequest(sendData);
 }
 
 void sendData()
 {
     //Wire.beginTransmission(); // transmit to device #4
+    //Serial.println("Writing to i2c bus");
     Wire.write(thumbstickRightHorizontalData);              // sends one byte  
     Wire.write(thumbstickRightVerticalData);
     Wire.write(rightTriggerData);
@@ -43,6 +56,7 @@ void sendData()
     Wire.write(b);
     Wire.write(y);
     Wire.write(x);
+    //Serial.println("Finished");
     //Wire.endTransmission();    // stop transmitting
 }
 
@@ -52,8 +66,8 @@ void loop()
   delay(100);
   digitalWrite(12,HIGH); //Turns the green light on the front on
 
-  int thumbstickRightHorizontalData  =  constrain(map(analogRead(thumbstickRightHorizontalPin),200,850,0,horizontalMaxSpeed),0,horizontalMaxSpeed);
-  int thumbstickRightVerticalData    =  constrain(map(analogRead(thumbstickRightVerticalPin),210,870,0,verticalMaxSpeed),0,verticalMaxSpeed);
+  thumbstickRightHorizontalData  =  constrain(map(analogRead(thumbstickRightHorizontalPin),200,850,0,horizontalMaxSpeed),0,horizontalMaxSpeed);
+  thumbstickRightVerticalData    =  constrain(map(analogRead(thumbstickRightVerticalPin),210,870,0,verticalMaxSpeed),0,verticalMaxSpeed);
   int rightTriggerData               =  constrain(map(analogRead(triggerRight),130,810,0,255),0,255);
   
   int a  =  digitalRead(aPin);

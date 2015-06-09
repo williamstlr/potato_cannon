@@ -4,7 +4,7 @@
 ////I2C stuff
 //#define i2c_data 7
 int i2c_data_length = 0;
-int data[24];
+byte data[24];
 byte data_index;
 byte state;
 int i2cDetected =0;
@@ -117,6 +117,8 @@ void setup()
   Wire.onReceive(receiveEvent); // register event
   Wire.onRequest(sendData);
   Serial.begin(9600);
+  Serial.println("Serial connection established");
+  Serial.println("waiting for data...");
 
 
   pinMode(sensorPinPan,INPUT);
@@ -142,7 +144,7 @@ void setup()
 void loop()
 {
   delay(10);
-  miscDebugging();
+  
   panLocation       =  analogRead(sensorPinPan);
   tiltLocation      =  analogRead(sensorPinTilt);
   
@@ -155,8 +157,55 @@ void loop()
   
   Wire.requestFrom(1,7);
   
-
+    int numBytesInTransaction = Wire.available();
+    i2c_data_length = Wire.available();
+    //Serial.print("Number of bytes in transaction: ");
+    //Serial.println(numBytesInTransaction);
   
+  while(Wire.available())
+  {
+    
+   
+   //int someData = Wire.read();
+   //Serial.println("Something is coming through"); 
+   //Serial.println(someData);
+   
+   
+   data[data_index++] = Wire.read();
+
+    if(data_index >= i2c_data_length)
+    {
+      data_index = 0;
+
+      horizontalMotion    =  ((map(data[0],0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
+      verticalMotion      =  constrain((((data[1])-verticalHalf)*2),-255,255);
+      fire              =  data[2];
+      a                 =  data[3];
+      b                 =  data[4];
+      y                 =  data[5];
+      x                 =  data[6];
+      
+      
+      if (verticalMotion >= -100 && verticalMotion <= 100)
+      {
+        verticalMotion = 0;
+      };
+      
+      
+      
+      if (horizontalMotion >= -20 && horizontalMotion <=20)
+      {
+        horizontalMotion = 0;
+      };
+    }//end data_index if
+   
+   
+   
+   
+   
+  }
+
+  miscDebugging();
   if (i2cDetected == 0)
   {
     lcd.clear();
