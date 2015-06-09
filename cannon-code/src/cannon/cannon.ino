@@ -2,9 +2,10 @@
 #include <LiquidCrystal595.h>    // include the shiftregister LCD library
 
 ////I2C stuff
-#define i2c_data 7
-byte data[i2c_data];
-byte cur_data_index;
+//#define i2c_data 7
+int i2c_data_length = 0;
+int data[24];
+byte data_index;
 byte state;
 int i2cDetected =0;
 
@@ -107,7 +108,7 @@ int printMovementDirection  =  0;    //1 for on, 0 for off
 int controllerInputDebug    =  0;
 int printXYLocation         =  0;
 int printBounceForce        =  0;
-int wirePrintReceived       =  0;
+int wirePrintReceived       =  1;
 
 void setup()
 {
@@ -164,7 +165,7 @@ void loop()
     lcd.setCursor(0,1);
     lcd.print("Not Detected");
   }  
-  if (i2cDetected ==1)
+  if (i2cDetected == 1)
   {
     lcdMenu();
   }
@@ -341,14 +342,16 @@ void printFuelTimerDebug()
 //Read Inputs
 void readInputs()
 {
+  i2c_data_length = Wire.available();
+  //Serial.println(i2c_data_length);
   while(Wire.available())
   {
+   
+    data[data_index++] = Wire.read();
 
-    data[cur_data_index++] = Wire.read();
-
-    if(cur_data_index >= i2c_data)
+    if(data_index >= i2c_data_length)
     {
-      cur_data_index = 0;
+      data_index = 0;
 
       horizontalMotion    =  ((map(data[0],0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
       verticalMotion      =  constrain((((data[1])-verticalHalf)*2),-255,255);
@@ -370,9 +373,10 @@ void readInputs()
       {
         horizontalMotion = 0;
       };
-    }//end cur_data_index if
+    }//end data_index if
 
   }//End wire.available while loop
+  
 }//end readInputs
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

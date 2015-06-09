@@ -91,5 +91,5 @@ void loop()
   }
 
   //x++;
-  delay(200);
+  delay(100);
 }
