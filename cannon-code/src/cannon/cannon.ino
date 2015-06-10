@@ -154,48 +154,33 @@ void loop()
   
   //Request 7-bytes from device 1 on the I2C bus
   Wire.requestFrom(1,7);
-  i2c_data_length = Wire.available(); //This determines the number of bytes coming down the I2C pipe, needed
-  //Serial.print(i2c_data_length);
-  while(Wire.available())
-  {
-    
-   data[data_index++] = Wire.read();
-
-    if(data_index >= i2c_data_length)
-    {
-      data_index = 0;
-
-      horizontalMotion    =  data[0];
-      verticalMotion      =  data[1];
-      
-      //horizontalMotion    =  ((map(data[0],0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
-      //verticalMotion      =  constrain((((data[1])-verticalHalf)*2),-255,255);
-      fire              =  data[2];
-      a                 =  data[3];
-      b                 =  data[4];
-      y                 =  data[5];
-      x                 =  data[6];
-      
-      //Filters out some controller noise
-      if (verticalMotion >= -100 && verticalMotion <= 100)    
-      {
-        verticalMotion = 0;
-      };
-      
-      //Filters out some controller noise
-      if (horizontalMotion >= -20 && horizontalMotion <=20)  
-      {
-        horizontalMotion = 0;
-      };
-      
-    }//end data_index if
   
-  }//end while wire.available
-
+  //Checks how many bytes are in the coming transaction and saves that number for the coming for loop
+  i2c_data_length = Wire.available(); //This determines the number of bytes coming down the I2C pipe, needed
+  
+  //Reads values from the I2C transaction and assigns their values to some variables
+  readWire();
+  
+  
+  
+  
+  keepOutputPinsLow();                                              
+  overRotationBounce();
+  moveCannon();
+  watchFire();
+  watchFuelButton();
+  watchFanButton();
+  warningBuzzer();
+  fanTimer();
+  fuelTimer();
+  //i2cDetected = 1;
+  
+  
+  
   miscDebugging();
   
   
-  if (i2cDetected == 0)                            //*This needs work*
+  if (i2c_data_length == 0)                            //*This needs work*
   {
     lcd.clear();
     lcd.setCursor(0,0);
@@ -203,7 +188,7 @@ void loop()
     lcd.setCursor(0,1);
     lcd.print("Not Detected");
   }  
-  if (i2cDetected == 1)
+  if (i2c_data_length >= 1)
   {
     lcdMenu();
   }
@@ -234,18 +219,7 @@ void receiveEvent(int howMany) //This is what runs when the I2C connection is UP
 {
   readInputs();
   
-  /*
-  keepOutputPinsLow();                                                **TODO, move all these into loop()**
-  overRotationBounce();
-  moveCannon();
-  watchFire();
-  watchFuelButton();
-  watchFanButton();
-  warningBuzzer();
-  fanTimer();
-  fuelTimer();
-  i2cDetected = 1;
-  */
+
   
   
   //(0-100)(-1)
@@ -264,6 +238,43 @@ void receiveEvent(int howMany) //This is what runs when the I2C connection is UP
 /////////////////////////////////////////////FUNCTIONS////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void readWire()
+{
+ while(Wire.available())
+  {
+    
+   data[data_index++] = Wire.read();
+
+    if(data_index >= i2c_data_length)
+    {
+      data_index = 0;
+
+      //Assigns the buffer to variables
+      horizontalMotion    =  ((map(data[0],0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
+      verticalMotion      =  constrain((((data[1])-verticalHalf)*2),-255,255);
+      fire              =  data[2];
+      a                 =  data[3];
+      b                 =  data[4];
+      y                 =  data[5];
+      x                 =  data[6];
+      
+      //Filters out some controller noise
+      if (verticalMotion >= -100 && verticalMotion <= 100)    
+      {
+        verticalMotion = 0;
+      };
+      
+      //Filters out some controller noise
+      if (horizontalMotion >= -20 && horizontalMotion <=20)  
+      {
+        horizontalMotion = 0;
+      };
+      
+    }//end data_index if
+  
+  }//end while wire.available 
+}
 
 void printFanTimerDebug()
 {
