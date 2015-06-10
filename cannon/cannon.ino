@@ -64,7 +64,8 @@ LiquidCrystal595 lcd(lcdDataPin,lcdLatchPin,lcdClockPin);     // datapin, latchp
 
 //Variables for menu
 int menuCurrentScreen    =  0;
-int menuNumberOfScreens  =  7;
+int menuLastScreen       =  0;
+int menuNumberOfScreens  =  6;
 
 //Some variables for keeping track of timers
 long previousFanMillis  =  0;
@@ -131,6 +132,7 @@ void setup()
   
   //LCD setup
   lcd.begin(16,2);
+
   
 }//End setup()
 
@@ -153,6 +155,7 @@ void loop()
   //Reads values from the I2C transaction and assigns their values to some variables
   readWire();
   
+  lcdMenu();
   keepOutputPinsLow();                                              
   overRotationBounce();
   moveCannon();
@@ -165,19 +168,6 @@ void loop()
   miscDebugging();
   
   
-  if (i2c_data_length == 0)                            //*This needs work*
-  {
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("I2C Connection");
-    lcd.setCursor(0,1);
-    lcd.print("Not Detected");
-  }  
-  if (i2c_data_length >= 1)
-  {
-    lcdMenu();
-  }
-
 
   ////////////////////Debugging////////////////////                                  **TODO, move all debugging functions to another file**
   //////////////Uncomment to Enable////////////////
@@ -771,26 +761,7 @@ if (menuCurrentScreen == 5)
       lastButtonStateB = buttonStateB;
   }//end buttonB "if"
   
- 
   }//end menu 6
-  
-  if (menuCurrentScreen == 7)
-  {
- 
-  
-  //panLocation
-  
-  
-  //tiltLocation
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("V angle = ");
-  lcd.setCursor(0,1);
-  lcd.print("H angle = ");
- 
-  }//end menu 7
-  
-  
   
 }//end LCD Menu
 
