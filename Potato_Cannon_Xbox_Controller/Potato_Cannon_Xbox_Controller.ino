@@ -14,7 +14,7 @@ int  xPin                           =  2;
   int verticalMaxSpeed       =  255;
   int verticalHalf      =  verticalMaxSpeed/2;
   
-  int  writeToWire               =  0;
+  //Debugging options. Set to 1 to enable
   int  writeValuesToSerialDebug  =  1; //doesn't work when the wire-write is enabled
   int calibrateThumbSticks       =  0;
   
@@ -24,12 +24,13 @@ int  xPin                           =  2;
   byte thumbstickRightHorizontalData  =  0;
   byte thumbstickRightVerticalData    =  0;
   byte rightTriggerData               =  0;
-  
   byte a  =  0;
   byte b  =  0;
   byte y  =  0;
   byte x  =  0;
-
+  
+  //Initialize the I2C buffer
+  byte i2cBuffer[6];
 void setup()
 {
   Wire.begin(1); // join i2c bus (address optional for master)
@@ -49,50 +50,39 @@ void setup()
 
 void sendData()
 {
-    //Wire.beginTransmission(); // transmit to device #4
-    //Serial.println("Writing to i2c bus...");
-    Wire.write(thumbstickRightHorizontalData);              // sends one byte  
-    Wire.write(thumbstickRightVerticalData);
-    Wire.write(rightTriggerData);
-    Wire.write(a);
-    Wire.write(b);
-    Wire.write(y);
-    Wire.write(x);
-    //Serial.println("Finished");
-    //Wire.endTransmission();    // stop transmitting
+    
+    //Fill buffer with sensor data
+    i2cBuffer[0]  =  thumbstickRightHorizontalData;
+    i2cBuffer[1]  =  thumbstickRightVerticalData;
+    i2cBuffer[2]  =  rightTriggerData;
+    i2cBuffer[3]  =  a;
+    i2cBuffer[4]  =  b;
+    i2cBuffer[5]  =  y;
+    i2cBuffer[6]  =  x;
+    
+    //write the buffer to the wire, 2nd argument is the number of bytes to send
+    Wire.write(i2cBuffer,7);
+
 }
 
 
 void loop()
 {
   delay(100);
-  digitalWrite(12,HIGH); //Turns the green status light on controller on
+  
+  //Turns the green status light on controller on
+  digitalWrite(12,HIGH); 
 
+  //Reads the data from the sensors
   thumbstickRightHorizontalData  =  constrain(map(analogRead(thumbstickRightHorizontalPin),200,850,0,horizontalMaxSpeed),0,horizontalMaxSpeed);
   thumbstickRightVerticalData    =  constrain(map(analogRead(thumbstickRightVerticalPin),210,870,0,verticalMaxSpeed),0,verticalMaxSpeed);
   rightTriggerData               =  constrain(map(analogRead(triggerRight),130,810,0,255),0,255);
-  
   a  =  digitalRead(aPin);
   b  =  digitalRead(bPin);
   y  =  digitalRead(yPin);
   x  =  digitalRead(xPin);
   
   
-  /*
-  //Write values to the Wire line
-  if(writeToWire == 1)
-  {
-    Wire.beginTransmission(4); // transmit to device #4
-    Wire.write(thumbstickRightHorizontalData);              // sends one byte  
-    Wire.write(thumbstickRightVerticalData);
-    Wire.write(rightTriggerData);
-    Wire.write(a);
-    Wire.write(b);
-    Wire.write(y);
-    Wire.write(x);
-    Wire.endTransmission();    // stop transmitting
-  }
-  */
   if(writeValuesToSerialDebug == 1)
   {
     Serial.print(thumbstickRightHorizontalData);
@@ -118,7 +108,5 @@ void loop()
     Serial.print(thumbstickRightHorizontalData);
     Serial.println();
   }
-
-  //x++;
   
-}
+}//end of main loop
