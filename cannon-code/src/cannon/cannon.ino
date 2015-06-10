@@ -1,3 +1,9 @@
+/*
+  Code for controlling a potato cannon with an arduino.
+  Written by Tyler Williams, June 2015
+  Code released to the public domain
+*/
+
 #include <Wire.h>
 #include <LiquidCrystal595.h>    // include the shiftregister LCD library
 
@@ -15,6 +21,9 @@ byte writeDataIndex;
 byte mappedPanLocation;    //Bytes to work with I2C
 byte mappedTiltLocation;
 
+#define sendDataNumber 1
+int  sendDataPosition = 0;
+int  sendDataBuffer[sendDataNumber];
 
 //Motor Enable Pins
 /*
@@ -94,15 +103,6 @@ int lastButtonStateB      =  0;
 int horizontalNoiseThreshold  =  horizontalMaxSpeed*.31;
 int verticalNoiseThreshold    =  80;
 
-#define sendDataNumber 1
-int  sendDataPosition = 0;
-int  sendDataBuffer[sendDataNumber];
-
-//Angle calculation variables
-int verticalAngle = 0;
-int horizontalAngle = 0;
-
-
 //debugging
 int printMovementDirection  =  0;    //1 for on, 0 for off
 int controllerInputDebug    =  0;
@@ -114,8 +114,6 @@ void setup()
 {
   //Communication setup
   Wire.begin();                // join i2c bus as the master
-  Wire.onReceive(receiveEvent); // register event                  **Remove me** No longer needed now that this is the I2C Master
-  Wire.onRequest(sendData);                                        //This probably isn't needed either
   Serial.begin(9600);
   Serial.println("Serial connection established");
   Serial.println("waiting for data...");
@@ -133,20 +131,14 @@ void setup()
   
   //LCD setup
   lcd.begin(16,2);
- 
   
-}
+}//End setup()
 
 void loop()
 {
   delay(10);
   
-  //This can probably be moved to it's own function                    *Change me*
-  panLocation       =  analogRead(sensorPinPan);   //Get pan value
-  tiltLocation      =  analogRead(sensorPinTilt);  //Get tilt value
-  
-  mappedPanLocation   = constrain(map(panLocation,rightTurnMax,leftTurnMax,0,127),0,127);  //Do some math to get the pan value within an acceptable range, it should be
-  mappedTiltLocation  = constrain(map(tiltLocation,tiltUpMax,tiltDownMax,0,127),0,127);    //a value 0-255 so that it will fit in an I2C transaction
+  readAndMapPanAndTilt();    //Needs to be before overRotationBounce()
   
   //Fill I2C send buffer
   sendDataBuffer[0] = mappedPanLocation;
@@ -161,9 +153,6 @@ void loop()
   //Reads values from the I2C transaction and assigns their values to some variables
   readWire();
   
-  
-  
-  
   keepOutputPinsLow();                                              
   overRotationBounce();
   moveCannon();
@@ -173,10 +162,6 @@ void loop()
   warningBuzzer();
   fanTimer();
   fuelTimer();
-  //i2cDetected = 1;
-  
-  
-  
   miscDebugging();
   
   
@@ -193,10 +178,6 @@ void loop()
     lcdMenu();
   }
 
-
-  
- 
-  
 
   ////////////////////Debugging////////////////////                                  **TODO, move all debugging functions to another file**
   //////////////Uncomment to Enable////////////////
@@ -215,23 +196,7 @@ void loop()
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }//End of loop()
-void receiveEvent(int howMany) //This is what runs when the I2C connection is UP  *Remove this whole function once everything is migrated to loop()*
-{
-  readInputs();
-  
 
-  
-  
-  //(0-100)(-1)
-  //(100-100)(-1)
-  
-  //int invertVertical = (map(panLocation,tiltDownMax,tiltUpMax,0,100)-100)-1;
-  //verticalAngle = map(verticalAngle,0,100,36,60);
-  //horizontalAngle = 0;
-  //Serial.print(invertVertical);
-  
-  
-}// End of receiveEvent loop
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -274,6 +239,15 @@ void readWire()
     }//end data_index if
   
   }//end while wire.available 
+}
+
+void readAndMapPanAndTilt()
+{
+  panLocation       =  analogRead(sensorPinPan);   //Get pan value
+  tiltLocation      =  analogRead(sensorPinTilt);  //Get tilt value
+  
+  mappedPanLocation   = constrain(map(panLocation,rightTurnMax,leftTurnMax,0,127),0,127);  //Do some math to get the pan value within an acceptable range, it should be
+  mappedTiltLocation  = constrain(map(tiltLocation,tiltUpMax,tiltDownMax,0,127),0,127);    //a value 0-255 so that it will fit in an I2C transaction 
 }
 
 void printFanTimerDebug()
@@ -325,12 +299,8 @@ void fanTimer()
     previousFanMillis  =  currentFanMillis;
   }
 
-  /* else
-   {
-   digitalWrite(fanPin,LOW);
-   }
-   */
-}
+
+}//ends fanTimer
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Fuel Timer
 void fuelTimer()
@@ -362,12 +332,7 @@ void fuelTimer()
     //noTone(buzzerPin);
 
   }
-  /*
-  else
-   {
-   digitalWrite(fuelPin,LOW);
-   }
-   */
+ 
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //print fuelTimer trigger
@@ -499,14 +464,8 @@ void overRotationBounce()
 {
 
   //Over-rotation bounce
-
-
-
-    int printBounceForceLeft    = -(horizontalMaxSpeed - (map(panLocation,150,850,0,horizontalMaxSpeed))) + 35;
+  int printBounceForceLeft    = -(horizontalMaxSpeed - (map(panLocation,150,850,0,horizontalMaxSpeed))) + 35;
   int printBounceForceRight   = -(map(panLocation,150,850,0,horizontalMaxSpeed)) + 35;
-
-
-
 
   if (panLocation > leftTurnMax)
   {
@@ -574,12 +533,12 @@ void miscDebugging()
   //Debugging
   if (controllerInputDebug == 1)
   {
+    Serial.print("controllerInputDebug debugging is active: ");
     String horizontalMessage = "Horizontal Motion = ";
     String verticalMessage    =" Vertical Motion = ";
     Serial.println(horizontalMessage + horizontalMotion + verticalMessage + verticalMotion);
-    //Serial.println(verticalMessage + verticalMotion);
   }
-  //Serial.println(analogRead(controllerPinHorizontal));
+  
   if (printXYLocation == 1)
   {
     Serial.print("X = ");
@@ -591,6 +550,7 @@ void miscDebugging()
 
   if(wirePrintReceived ==1)
   {
+    Serial.print("wirePrintReceived debugging active: ");
     Serial.print(horizontalMotion); 
     Serial.print(',');
     Serial.print(verticalMotion);
@@ -661,11 +621,7 @@ void lcdMenu()
  
   
   //If button is pressed, advance to the next screen
-  /*if (y == 0)
-  {
-    menuCurrentScreen = menuCurrentScreen++;
-  }
-  */
+  
   //return to the first screen
   if (menuCurrentScreen > menuNumberOfScreens)
   {
@@ -785,7 +741,6 @@ if (menuCurrentScreen == 5)
   lcd.print("Horiz. Strength");
   lcd.setCursor(0,1);
   lcd.print(horizontalMaxSpeed);
-  //lcd.print("Fix Me");
   
   if (menuCurrentScreen == 6)
   {
@@ -830,12 +785,8 @@ if (menuCurrentScreen == 5)
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("V angle = ");
-  lcd.print(verticalAngle);
-  //lcd.print(" degrees");
   lcd.setCursor(0,1);
   lcd.print("H angle = ");
-  lcd.print(horizontalAngle);
-  //lcd.print(" degrees");
  
   }//end menu 7
   
