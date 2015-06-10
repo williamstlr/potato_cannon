@@ -155,24 +155,21 @@ void loop()
   //Request 7-bytes from device 1 on the I2C bus
   Wire.requestFrom(1,7);
   i2c_data_length = Wire.available(); //This determines the number of bytes coming down the I2C pipe, needed
-  
+  //Serial.print(i2c_data_length);
   while(Wire.available())
   {
     
-   
-   //int someData = Wire.read();
-   //Serial.println("Something is coming through");                         *Remove me*
-   //Serial.println(someData);
-   
-   
    data[data_index++] = Wire.read();
 
     if(data_index >= i2c_data_length)
     {
       data_index = 0;
 
-      horizontalMotion    =  ((map(data[0],0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
-      verticalMotion      =  constrain((((data[1])-verticalHalf)*2),-255,255);
+      horizontalMotion    =  data[0];
+      verticalMotion      =  data[1];
+      
+      //horizontalMotion    =  ((map(data[0],0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
+      //verticalMotion      =  constrain((((data[1])-verticalHalf)*2),-255,255);
       fire              =  data[2];
       a                 =  data[3];
       b                 =  data[4];
@@ -192,7 +189,7 @@ void loop()
       };
       
     }//end data_index if
-    
+  
   }//end while wire.available
 
   miscDebugging();
