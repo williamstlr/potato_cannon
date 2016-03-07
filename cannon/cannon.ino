@@ -153,7 +153,8 @@ void loop()
   i2c_data_length = Wire.available(); //This determines the number of bytes coming down the I2C pipe, needed
   
   //Reads values from the I2C transaction and assigns their values to some variables
-  readWire();
+  //readWire();
+  readSerial();
   
   lcdMenu();
   keepOutputPinsLow();                                              
@@ -229,6 +230,24 @@ void readWire()
     }//end data_index if
   
   }//end while wire.available 
+}//end readWire()
+
+void readSerial()
+{
+      horizontalMotion    =  ((map(Serial.parseInt(),0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
+      verticalMotion      =  constrain((((Serial.parseInt())-verticalHalf)*2),-255,255);
+      fire              =  Serial.parseInt();
+      a                 =  Serial.parseInt();
+      b                 =  Serial.parseInt();
+      y                 =  Serial.parseInt();
+      x                 =  Serial.parseInt();
+      char delimiter     = Serial.read();
+
+      if (delimiter == '\n')
+      {
+        Serial.println("Delimiter: " + delimiter);
+      }
+      
 }
 
 void readAndMapPanAndTilt()
