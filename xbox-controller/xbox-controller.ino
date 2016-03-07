@@ -33,7 +33,7 @@ int  xPin                           =  2;
   byte i2cBuffer[6];
 void setup()
 {
-  Wire.begin(1); // join i2c bus (address optional for master)
+  //Wire.begin(1); // join i2c bus (address optional for master)
   pinMode(thumbstickRightHorizontalPin,INPUT);
   pinMode(thumbstickRightVerticalPin,INPUT);
   pinMode(triggerRight,INPUT);
@@ -62,7 +62,7 @@ void sendData()
     
     //write the buffer to the wire, 2nd argument is the number of bytes to send
     Wire.write(i2cBuffer,7);
-
+        
 }
 
 
