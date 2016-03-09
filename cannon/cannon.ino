@@ -4,26 +4,7 @@
   Code released to the public domain
 */
 
-#include <Wire.h>
 #include <LiquidCrystal595.h>    // include the shiftregister LCD library
-
-////I2C stuff
-//#define i2c_data 7
-int i2c_data_length = 0;
-byte data[24];    //These are bytes because I2C works with individual bytes per transaction
-byte data_index;
-byte state;
-int i2cDetected =0;
-
-#define i2c_write_data 2    //Number of bytes that I want to send
-byte writeData[i2c_write_data];
-byte writeDataIndex;
-byte mappedPanLocation;    //Bytes to work with I2C
-byte mappedTiltLocation;
-
-#define sendDataNumber 1
-int  sendDataPosition = 0;
-int  sendDataBuffer[sendDataNumber];
 
 //Motor Enable Pins
 /*
@@ -82,6 +63,11 @@ int horizontalHalf        =  horizontalMaxSpeed/2;
 int verticalHalf          =  verticalMaxSpeed/2;
 
 //Initializing some variables
+int horizontalMotionRaw   =  0;
+int verticalMotionRaw     =  0;
+int mappedPanLocation; 
+int mappedTiltLocation;
+
 int horizontalMotion      =  0;
 int verticalMotion        =  0;
 int fire                  =  0;
@@ -109,15 +95,20 @@ int printMovementDirection  =  0;    //1 for on, 0 for off
 int controllerInputDebug    =  0;
 int printXYLocation         =  0;
 int printBounceForce        =  0;
-int wirePrintReceived       =  1;
+int wirePrintReceived       =  0;
+int printRawValues          =  1;
+int printNormalizedValues   =  0;
+
+//Serial Communication Values
+int numCommands = 7;
 
 void setup()
 {
   //Communication setup
-  Wire.begin();                // join i2c bus as the master
   Serial.begin(9600);
   Serial.println("Serial connection established");
-  Serial.println("waiting for data...");
+  Serial.println("Controller should send '#' followed immediately by comma-delmited values");
+  Serial.println("Example #1,2,3,4,5,6,7");
 
   //Pin setup
   pinMode(sensorPinPan,INPUT);
@@ -138,23 +129,12 @@ void setup()
 
 void loop()
 {
-  delay(10);
+  delay(1);
   
   readAndMapPanAndTilt();    //Needs to be before overRotationBounce()
-  
-  //Fill I2C send buffer
-  sendDataBuffer[0] = mappedPanLocation;
-  sendDataBuffer[1] = mappedTiltLocation;
-  
-  //Request 7-bytes from device 1 on the I2C bus
-  Wire.requestFrom(1,7);
-  
-  //Checks how many bytes are in the coming transaction and saves that number for the coming for loop
-  i2c_data_length = Wire.available(); //This determines the number of bytes coming down the I2C pipe, needed
-  
-  //Reads values from the I2C transaction and assigns their values to some variables
-  //readWire();
   readSerial();
+  normalizeMotionValues();
+  //sendPosition();
   
   lcdMenu();
   keepOutputPinsLow();                                              
@@ -195,59 +175,39 @@ void loop()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void readWire()
-{
- while(Wire.available())
-  {
-    
-   data[data_index++] = Wire.read();
-
-    if(data_index >= i2c_data_length)
-    {
-      data_index = 0;
-
-      //Assigns the buffer to variables
-      horizontalMotion    =  ((map(data[0],0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
-      verticalMotion      =  constrain((((data[1])-verticalHalf)*2),-255,255);
-      fire              =  data[2];
-      a                 =  data[3];
-      b                 =  data[4];
-      y                 =  data[5];
-      x                 =  data[6];
-      
-      //Filters out some controller noise
-      if (verticalMotion >= -100 && verticalMotion <= 100)    
-      {
-        verticalMotion = 0;
-      };
-      
-      //Filters out some controller noise
-      if (horizontalMotion >= -20 && horizontalMotion <=20)  
-      {
-        horizontalMotion = 0;
-      };
-      
-    }//end data_index if
-  
-  }//end while wire.available 
-}//end readWire()
 
 void readSerial()
 {
-      horizontalMotion    =  ((map(Serial.parseInt(),0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
-      verticalMotion      =  constrain((((Serial.parseInt())-verticalHalf)*2),-255,255);
-      fire              =  Serial.parseInt();
-      a                 =  Serial.parseInt();
-      b                 =  Serial.parseInt();
-      y                 =  Serial.parseInt();
-      x                 =  Serial.parseInt();
-      char delimiter     = Serial.read();
-
-      if (delimiter == '\n')
-      {
-        Serial.println("Delimiter: " + delimiter);
-      }
+      //Controller waits until it receives '1243' to send the values, hopefully this will keep things more in sync and prevent the serial line from filling up.
+      Serial.println(1243);
       
+      delay(1); //may or may not be needed. Try some testing with this.
+      while (Serial.available())
+      {
+        if (Serial.read()   == '#')
+        {
+          horizontalMotionRaw =  Serial.parseInt();
+          verticalMotionRaw   =  Serial.parseInt();
+          fire                =  Serial.parseInt();
+          a                   =  Serial.parseInt();
+          b                   =  Serial.parseInt();
+          y                   =  Serial.parseInt();
+          x                   =  Serial.parseInt();
+          char delimiter      =  Serial.read();
+        }//end if
+
+        else
+        {
+          Serial.read();
+        }
+        
+      }//end while
+}
+
+void normalizeMotionValues()
+{
+  horizontalMotion    =  ((map(horizontalMotionRaw,0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
+  verticalMotion      =  constrain((((verticalMotionRaw)-verticalHalf)*2),-255,255);
 }
 
 void readAndMapPanAndTilt()
@@ -366,46 +326,6 @@ void printFuelTimerDebug()
 
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Read Inputs
-void readInputs()
-{
-  i2c_data_length = Wire.available();
-  //Serial.println(i2c_data_length);
-  while(Wire.available())
-  {
-   
-    data[data_index++] = Wire.read();
-
-    if(data_index >= i2c_data_length)
-    {
-      data_index = 0;
-
-      horizontalMotion    =  ((map(data[0],0,255,0,horizontalMaxSpeed))-horizontalHalf)*-2;
-      verticalMotion      =  constrain((((data[1])-verticalHalf)*2),-255,255);
-      fire              =  data[2];
-      a                 =  data[3];
-      b                 =  data[4];
-      y                 =  data[5];
-      x                 =  data[6];
-      
-      
-      if (verticalMotion >= -100 && verticalMotion <= 100)
-      {
-        verticalMotion = 0;
-      };
-      
-      
-      
-      if (horizontalMotion >= -20 && horizontalMotion <=20)
-      {
-        horizontalMotion = 0;
-      };
-    }//end data_index if
-
-  }//End wire.available while loop
-  
-}//end readInputs
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -576,6 +496,44 @@ void miscDebugging()
     Serial.println();
   }
 
+  if(printRawValues ==1)
+  {
+    Serial.print("Raw values: ");
+    Serial.print(horizontalMotionRaw); 
+    Serial.print(',');
+    Serial.print(verticalMotionRaw);
+    Serial.print(',');
+    Serial.print(fire);
+    Serial.print(',');
+    Serial.print(a);
+    Serial.print(',');
+    Serial.print(b);
+    Serial.print(',');
+    Serial.print(y);
+    Serial.print(',');
+    Serial.print(x);
+    Serial.println();
+  }
+
+  if(printNormalizedValues ==1)
+  {
+    Serial.print("Raw values: ");
+    Serial.print(horizontalMotion); 
+    Serial.print(',');
+    Serial.print(verticalMotion);
+    Serial.print(',');
+    Serial.print(fire);
+    Serial.print(',');
+    Serial.print(a);
+    Serial.print(',');
+    Serial.print(b);
+    Serial.print(',');
+    Serial.print(y);
+    Serial.print(',');
+    Serial.print(x);
+    Serial.println();
+  }
+
 }
 
 void warningBuzzer()
@@ -591,19 +549,13 @@ void warningBuzzer()
   }
 }
 
-void sendData()
+void sendPosition()
 {
-  
-   if (sendDataPosition > sendDataNumber)
-  {
-    sendDataPosition = 0;
-  }
-  
-  Wire.write(sendDataBuffer[sendDataPosition++]);
- 
- 
-  
-}
+  Serial.print(panLocation);
+  Serial.print(',');
+  Serial.print(tiltLocation);
+  Serial.println();
+}//end sendPosition()
 
 void lcdMenu()
 {
