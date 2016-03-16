@@ -1,5 +1,11 @@
-#include <Wire.h>
+#include <SoftwareSerial.h>
 
+SoftwareSerial BTSerial(10, 11); // RX | TX
+
+
+bool sendReady = false;
+
+//Pin Setup
 int thumbstickRightHorizontalPin    =  A0;  //White
 int thumbstickRightVerticalPin      =  A1;  //Yellow
 int triggerRight                    =  A2;  //Green
@@ -17,6 +23,7 @@ int verticalHalf      =  verticalMaxSpeed/2;
 //Debugging options. Set to 1 to enable
 int  writeValuesToSerialDebug  =  1; //doesn't work when the wire-write is enabled
 int calibrateThumbSticks       =  0;
+bool serialPrintValues  = true;
 
 //Initialize variables for data to be sent. The are bytes because i2c specifcally requests bytes.
 //if an int data type is used, two bytes will be sent for every value and it will really screw
@@ -38,9 +45,18 @@ int hTotal = 0;
 int vTotal = 0;
 int hAverage = 0;
 int vAverage = 0;
-  
+
+//Delete These
+int iterator = 0;
+
+
 void setup()
 {
+  //Starts serial ports
+  Serial.begin(9600);
+  BTSerial.begin(38400);  
+
+  //Sets pin modes
   pinMode(thumbstickRightHorizontalPin,INPUT);
   pinMode(thumbstickRightVerticalPin,INPUT);
   pinMode(triggerRight,INPUT);
@@ -49,11 +65,8 @@ void setup()
   pinMode(yPin,INPUT_PULLUP);
   pinMode(xPin,INPUT_PULLUP);
   pinMode(12,OUTPUT);
-  Serial.begin(250000);
-  Serial.println("Serial connection established");
-  Serial.println("Send '1243' to receive values");
 
-//Sets all of the readings to zero
+  //Sets all of the readings to zero
   for (int i = 0; i < numReadings; i++)
   {
     hReadings[i] = 0;
@@ -64,7 +77,8 @@ void setup()
 
 void loop()
 {
-  //delay(10);
+  //Turns the green status light on controller on
+  digitalWrite(12,HIGH); 
 
   //Calculate the average of the analog thumbsticks
   hTotal = hTotal - hReadings[readIndex];
@@ -74,17 +88,14 @@ void loop()
   hTotal = hTotal + hReadings[readIndex];
   vTotal = vTotal + vReadings[readIndex];
   readIndex++;
-
+  
   if (readIndex >= numReadings)
   {
     readIndex = 0;
   }
-
+  
   hAverage = hTotal / numReadings;
   vAverage = vTotal / numReadings;
-
-  //Turns the green status light on controller on
-  digitalWrite(12,HIGH); 
 
   //Reads the data from the sensors
   //thumbstickRightHorizontalData  =  constrain(map(analogRead(thumbstickRightHorizontalPin),200,850,0,horizontalMaxSpeed),0,horizontalMaxSpeed);
@@ -96,13 +107,61 @@ void loop()
   b  =  digitalRead(bPin);
   y  =  digitalRead(yPin);
   x  =  digitalRead(xPin);
-  
 
-  //Waits until it receives 1243 and then it will send it's values back
-  while (Serial.available() > 0)
+
+  
+  while (BTSerial.available())
+  {
+    int data = BTSerial.read();
+
+    if (data == 1243)
     {
-    if (Serial.parseInt() == 1243)
+      sendReady = 1;
+      Serial.println("Send Ready!");
+    }//if
+
+    else
     {
+      BTSerial.read();
+    }
+  }//while
+
+  if (sendReady = true)
+  {
+    /*
+    sendReady = 0;
+    Serial.print("Sending Data: #");
+    Serial.print(iterator);
+    Serial.print(",2,3,4,5,6,7");
+    Serial.println();
+    
+    
+    BTSerial.print("#");
+    BTSerial.print(iterator);
+    BTSerial.print(",2,3,4,5,6,7");
+    BTSerial.println();
+    iterator++;
+    */
+    BTSerial.print("#");
+    BTSerial.print(thumbstickRightHorizontalData);
+    BTSerial.print(",");
+    BTSerial.print(thumbstickRightVerticalData);
+    BTSerial.print(",");
+    BTSerial.print(rightTriggerData);
+    BTSerial.print(",");
+    BTSerial.print(a);
+    BTSerial.print(",");
+    BTSerial.print(b);
+    BTSerial.print(",");
+    BTSerial.print(y);
+    BTSerial.print(",");
+    BTSerial.print(x);
+    BTSerial.println();
+    sendReady = false;
+
+    if (serialPrintValues == true)
+    {
+      Serial.print("#");
       Serial.print(thumbstickRightHorizontalData);
       Serial.print(",");
       Serial.print(thumbstickRightVerticalData);
@@ -118,12 +177,8 @@ void loop()
       Serial.print(x);
       Serial.println();
     }
+  }//end sendReady if
 
-    else
-    {
-      break;
-    }
-  }
   if(calibrateThumbSticks == 1)
   {
     Serial.print(analogRead(A0));
@@ -131,5 +186,5 @@ void loop()
     Serial.print(thumbstickRightHorizontalData);
     Serial.println();
   }
-  
-}//end of main loop
+}//end loop
+

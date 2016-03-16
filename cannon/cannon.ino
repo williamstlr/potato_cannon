@@ -3,8 +3,15 @@
   Written by Tyler Williams, June 2015
   Code released to the public domain
 */
+//Delete These
+int testCounter = 0;
+
 
 #include <LiquidCrystal595.h>    // include the shiftregister LCD library
+#include <SoftwareSerial.h>
+
+
+SoftwareSerial BTSerial(A4,A5);
 
 //Motor Enable Pins
 /*
@@ -18,7 +25,7 @@ Motor Pin Connections
 int horizontalMaxSpeed    =  75;
 int verticalMaxSpeed      =  255;
 long fanRunTime      =  10000;  //How long to run the fan for after the button is pressed
-float fuelFillTime    =  2000;  //How long to keep the fuel valve open after the button is pressed.
+long fuelFillTime    =  2000;  //How long to keep the fuel valve open after the button is pressed.
 int leftTurnMax      =  850;   //How far the cannon can turn left
 int rightTurnMax     =  150;   //How far the cannon can turn right
 int tiltDownMax      =  875;
@@ -102,10 +109,14 @@ int printNormalizedValues   =  0;
 //Serial Communication Values
 int numCommands = 7;
 
+//delete these
+int i = 0;
+
 void setup()
 {
   //Communication setup
   Serial.begin(9600);
+  BTSerial.begin(38400);  
   Serial.println("Serial connection established");
   Serial.println("Controller should send '#' followed immediately by comma-delmited values");
   Serial.println("Example #1,2,3,4,5,6,7");
@@ -129,6 +140,7 @@ void setup()
 
 void loop()
 {
+  long beginTime = millis();
   delay(1);
   
   readAndMapPanAndTilt();    //Needs to be before overRotationBounce()
@@ -147,7 +159,21 @@ void loop()
   fanTimer();
   fuelTimer();
   miscDebugging();
-  
+
+/*
+  long endTime = millis();
+
+  long totalTime = endTime - beginTime;
+  Serial.print(beginTime);
+  Serial.print('-');
+  Serial.print(endTime);
+  Serial.print('=');
+  Serial.print(totalTime);
+  Serial.print(" i=");
+  Serial.print(i);
+  i = i+1;
+  Serial.println();
+*/ 
   
 
   ////////////////////Debugging////////////////////                                  **TODO, move all debugging functions to another file**
@@ -178,8 +204,10 @@ void loop()
 
 void readSerial()
 {
-      //Controller waits until it receives '1243' to send the values, hopefully this will keep things more in sync and prevent the serial line from filling up.
+      //Controller waits until it receives '1' to send the values, hopefully this will keep things more in sync and prevent the serial line from filling up.
       Serial.println(1243);
+      Serial.println(testCounter++);
+      testCounter++;
       
       delay(1); //may or may not be needed. Try some testing with this.
       while (Serial.available())
@@ -194,6 +222,7 @@ void readSerial()
           y                   =  Serial.parseInt();
           x                   =  Serial.parseInt();
           char delimiter      =  Serial.read();
+          delay(5);
         }//end if
 
         else
