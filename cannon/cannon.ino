@@ -140,7 +140,8 @@ void loop()
   readSerial();
   normalizeMotionValues();
   //sendPosition();
-  
+
+  miscDebugging();
   lcdMenu();
   keepOutputPinsLow();                                              
   overRotationBounce();
@@ -151,7 +152,7 @@ void loop()
   warningBuzzer();
   fanTimer();
   fuelTimer();
-  miscDebugging();
+  
 
 /*
   long endTime = millis();
@@ -200,7 +201,7 @@ void readSerial()
       //Controller waits until it receives '1243' to send the values, hopefully this will keep things more in sync and prevent the serial line from filling up.
       BTSerial.print('$');
       //Serial.println("$");
-      delay(25); //may or may not be needed. Try some testing with this.
+      delay(50); //may or may not be needed. Try some testing with this.
       
       while (BTSerial.available())
       {
@@ -411,6 +412,14 @@ void moveCannon()
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  horizontalMotionRaw =  0;
+  verticalMotionRaw   =  0;
+  fire                =  0;
+  a                   =  1;
+  b                   =  1;
+  y                   =  1;
+  x                   =  1;
 }
 
 void overRotationBounce()

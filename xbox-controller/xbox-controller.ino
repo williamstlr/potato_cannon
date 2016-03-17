@@ -82,7 +82,7 @@ void loop()
 {
   //Turns the green status light on controller on
   digitalWrite(12,HIGH); 
-
+  delay(20);
   //Calculate the average of the analog thumbsticks
   hTotal = hTotal - hReadings[readIndex];
   vTotal = vTotal - vReadings[readIndex];
@@ -118,12 +118,11 @@ void loop()
     //Serial.println("BTSerial available: " + BTSerial.available());
     int data = 0;
     currentChar = BTSerial.read();
-    Serial.write(currentChar);
+    //Serial.write(currentChar);
 
     if (currentChar == '$')
     {
       cannonReady = 1;
-      Serial.println("\nSend Ready!");
     }//if
 
 
@@ -138,7 +137,6 @@ void loop()
   if (cannonReady == 1)
   {
     cannonReady = 0;
-    Serial.println("Running cannonReady loop");
     
     BTSerial.print("#");
     BTSerial.print(thumbstickRightHorizontalData);
