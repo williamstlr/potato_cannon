@@ -3,8 +3,6 @@
   Written by Tyler Williams, June 2015
   Code released to the public domain
 */
-//Delete These
-int testCounter = 0;
 
 
 #include <LiquidCrystal595.h>    // include the shiftregister LCD library
@@ -106,17 +104,12 @@ int wirePrintReceived       =  0;
 int printRawValues          =  1;
 int printNormalizedValues   =  0;
 
-//Serial Communication Values
-int numCommands = 7;
-
-//delete these
-int i = 0;
 
 void setup()
 {
   //Communication setup
   Serial.begin(9600);
-  BTSerial.begin(38400);  
+  BTSerial.begin(9600);  
   Serial.println("Serial connection established");
   Serial.println("Controller should send '#' followed immediately by comma-delmited values");
   Serial.println("Example #1,2,3,4,5,6,7");
@@ -204,33 +197,35 @@ void loop()
 
 void readSerial()
 {
-      //Controller waits until it receives '1' to send the values, hopefully this will keep things more in sync and prevent the serial line from filling up.
-      Serial.println(1243);
-      Serial.println(testCounter++);
-      testCounter++;
+      //Controller waits until it receives '1243' to send the values, hopefully this will keep things more in sync and prevent the serial line from filling up.
+      BTSerial.print('$');
+      //Serial.println("$");
+      delay(25); //may or may not be needed. Try some testing with this.
       
-      delay(1); //may or may not be needed. Try some testing with this.
-      while (Serial.available())
+      while (BTSerial.available())
       {
-        if (Serial.read()   == '#')
+        //Serial.println(BTSerial.read());
+        
+        if (BTSerial.read()   == '#')
         {
-          horizontalMotionRaw =  Serial.parseInt();
-          verticalMotionRaw   =  Serial.parseInt();
-          fire                =  Serial.parseInt();
-          a                   =  Serial.parseInt();
-          b                   =  Serial.parseInt();
-          y                   =  Serial.parseInt();
-          x                   =  Serial.parseInt();
-          char delimiter      =  Serial.read();
+          horizontalMotionRaw =  BTSerial.parseInt();
+          verticalMotionRaw   =  BTSerial.parseInt();
+          fire                =  BTSerial.parseInt();
+          a                   =  BTSerial.parseInt();
+          b                   =  BTSerial.parseInt();
+          y                   =  BTSerial.parseInt();
+          x                   =  BTSerial.parseInt();
+          char delimiter      =  BTSerial.read();
           delay(5);
         }//end if
 
         else
         {
-          Serial.read();
+          BTSerial.read();
         }
         
       }//end while
+      
 }
 
 void normalizeMotionValues()

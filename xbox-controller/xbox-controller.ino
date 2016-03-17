@@ -3,7 +3,8 @@
 SoftwareSerial BTSerial(10, 11); // RX | TX
 
 
-bool sendReady = false;
+int cannonReady = 0;
+char currentChar = ' ';
 
 //Pin Setup
 int thumbstickRightHorizontalPin    =  A0;  //White
@@ -21,7 +22,7 @@ int verticalMaxSpeed       =  255;
 int verticalHalf      =  verticalMaxSpeed/2;
 
 //Debugging options. Set to 1 to enable
-int  writeValuesToSerialDebug  =  1; //doesn't work when the wire-write is enabled
+int  writeValuesToSerialDebug  =  0; //doesn't work when the wire-write is enabled
 int calibrateThumbSticks       =  0;
 bool serialPrintValues  = true;
 
@@ -72,7 +73,9 @@ void setup()
     hReadings[i] = 0;
     vReadings[i] = 0;
   }
-}
+
+  //Serial.println("sendReady= " + sendReady);
+}//end setup
 
 
 void loop()
@@ -108,40 +111,35 @@ void loop()
   y  =  digitalRead(yPin);
   x  =  digitalRead(xPin);
 
-
-  
+  //Serial.print("BTSerial avaible: ");
+  //Serial.println(BTSerial.available());
   while (BTSerial.available())
   {
-    int data = BTSerial.read();
+    //Serial.println("BTSerial available: " + BTSerial.available());
+    int data = 0;
+    currentChar = BTSerial.read();
+    Serial.write(currentChar);
 
-    if (data == 1243)
+    if (currentChar == '$')
     {
-      sendReady = 1;
-      Serial.println("Send Ready!");
+      cannonReady = 1;
+      Serial.println("\nSend Ready!");
     }//if
+
 
     else
     {
       BTSerial.read();
+      cannonReady = 0;
     }
+    delay(1);
   }//while
-
-  if (sendReady = true)
+  
+  if (cannonReady == 1)
   {
-    /*
-    sendReady = 0;
-    Serial.print("Sending Data: #");
-    Serial.print(iterator);
-    Serial.print(",2,3,4,5,6,7");
-    Serial.println();
+    cannonReady = 0;
+    Serial.println("Running cannonReady loop");
     
-    
-    BTSerial.print("#");
-    BTSerial.print(iterator);
-    BTSerial.print(",2,3,4,5,6,7");
-    BTSerial.println();
-    iterator++;
-    */
     BTSerial.print("#");
     BTSerial.print(thumbstickRightHorizontalData);
     BTSerial.print(",");
@@ -157,7 +155,6 @@ void loop()
     BTSerial.print(",");
     BTSerial.print(x);
     BTSerial.println();
-    sendReady = false;
 
     if (serialPrintValues == true)
     {
@@ -177,6 +174,7 @@ void loop()
       Serial.print(x);
       Serial.println();
     }
+
   }//end sendReady if
 
   if(calibrateThumbSticks == 1)
