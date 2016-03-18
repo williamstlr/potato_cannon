@@ -3,7 +3,7 @@
   Written by Tyler Williams, June 2015
   Code released to the public domain
 */
-
+int i = 0;
 
 #include <LiquidCrystal595.h>    // include the shiftregister LCD library
 #include <SoftwareSerial.h>
@@ -134,7 +134,7 @@ void setup()
 void loop()
 {
   long beginTime = millis();
-  delay(1);
+  delay(75);
   
   readAndMapPanAndTilt();    //Needs to be before overRotationBounce()
   readSerial();
@@ -154,20 +154,17 @@ void loop()
   fuelTimer();
   
 
-/*
-  long endTime = millis();
 
+  long endTime = millis();
+/*
   long totalTime = endTime - beginTime;
-  Serial.print(beginTime);
-  Serial.print('-');
-  Serial.print(endTime);
-  Serial.print('=');
+  Serial.print("Loop duration:" );
   Serial.print(totalTime);
-  Serial.print(" i=");
+  Serial.print(" Loop count");
   Serial.print(i);
   i = i+1;
   Serial.println();
-*/ 
+*/
   
 
   ////////////////////Debugging////////////////////                                  **TODO, move all debugging functions to another file**
@@ -201,11 +198,11 @@ void readSerial()
       //Controller waits until it receives '1243' to send the values, hopefully this will keep things more in sync and prevent the serial line from filling up.
       BTSerial.print('$');
       //Serial.println("$");
-      delay(50); //may or may not be needed. Try some testing with this.
+      //delay(10); //may or may not be needed. Try some testing with this.
       
       while (BTSerial.available())
       {
-        //Serial.println(BTSerial.read());
+        //Serial.write(BTSerial.peek());
         
         if (BTSerial.read()   == '#')
         {
@@ -217,7 +214,7 @@ void readSerial()
           y                   =  BTSerial.parseInt();
           x                   =  BTSerial.parseInt();
           char delimiter      =  BTSerial.read();
-          delay(5);
+          //delay(5);
         }//end if
 
         else
