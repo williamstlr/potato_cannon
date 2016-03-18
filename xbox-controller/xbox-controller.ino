@@ -3,7 +3,6 @@
 SoftwareSerial BTSerial(10, 11); // RX | TX
 
 
-int cannonReady = 0;
 char currentChar = ' ';
 
 //Pin Setup
@@ -47,10 +46,6 @@ int vTotal = 0;
 int hAverage = 0;
 int vAverage = 0;
 
-//Delete These
-int iterator = 0;
-
-
 void setup()
 {
   //Starts serial ports
@@ -74,7 +69,6 @@ void setup()
     vReadings[i] = 0;
   }
 
-  //Serial.println("sendReady= " + sendReady);
 }//end setup
 
 
@@ -82,7 +76,7 @@ void loop()
 {
   //Turns the green status light on controller on
   digitalWrite(12,HIGH); 
-  delay(20);
+  //delay(20);
   //Calculate the average of the analog thumbsticks
   hTotal = hTotal - hReadings[readIndex];
   vTotal = vTotal - vReadings[readIndex];
@@ -101,8 +95,6 @@ void loop()
   vAverage = vTotal / numReadings;
 
   //Reads the data from the sensors
-  //thumbstickRightHorizontalData  =  constrain(map(analogRead(thumbstickRightHorizontalPin),200,850,0,horizontalMaxSpeed),0,horizontalMaxSpeed);
-  //thumbstickRightVerticalData    =  constrain(map(analogRead(thumbstickRightVerticalPin),210,870,0,verticalMaxSpeed),0,verticalMaxSpeed);
   thumbstickRightHorizontalData  =  constrain(map(hAverage,200,850,0,horizontalMaxSpeed),0,horizontalMaxSpeed);
   thumbstickRightVerticalData    =  constrain(map(vAverage,210,870,0,verticalMaxSpeed),0,verticalMaxSpeed);
   rightTriggerData               =  constrain(map(analogRead(triggerRight),130,810,0,255),0,255);
@@ -111,69 +103,57 @@ void loop()
   y  =  digitalRead(yPin);
   x  =  digitalRead(xPin);
 
-  //Serial.print("BTSerial avaible: ");
-  //Serial.println(BTSerial.available());
   while (BTSerial.available())
   {
-    //Serial.println("BTSerial available: " + BTSerial.available());
-    int data = 0;
     currentChar = BTSerial.read();
-    //Serial.write(currentChar);
 
     if (currentChar == '$')
     {
-      cannonReady = 1;
+      BTSerial.print("#");
+      BTSerial.print(thumbstickRightHorizontalData);
+      BTSerial.print(",");
+      BTSerial.print(thumbstickRightVerticalData);
+      BTSerial.print(",");
+      BTSerial.print(rightTriggerData);
+      BTSerial.print(",");
+      BTSerial.print(a);
+      BTSerial.print(",");
+      BTSerial.print(b);
+      BTSerial.print(",");
+      BTSerial.print(y);
+      BTSerial.print(",");
+      BTSerial.print(x);
+      BTSerial.println();
+      
+      if (serialPrintValues == true)
+      {
+        Serial.print("#");
+        Serial.print(thumbstickRightHorizontalData);
+        Serial.print(",");
+        Serial.print(thumbstickRightVerticalData);
+        Serial.print(",");
+        Serial.print(rightTriggerData);
+        Serial.print(",");
+        Serial.print(a);
+        Serial.print(",");
+        Serial.print(b);
+        Serial.print(",");
+        Serial.print(y);
+        Serial.print(",");
+        Serial.print(x);
+        Serial.println();
+      }
     }//if
 
 
     else
     {
       BTSerial.read();
-      cannonReady = 0;
     }
-    delay(1);
+    //delay(1);
   }//while
   
-  if (cannonReady == 1)
-  {
-    cannonReady = 0;
-    
-    BTSerial.print("#");
-    BTSerial.print(thumbstickRightHorizontalData);
-    BTSerial.print(",");
-    BTSerial.print(thumbstickRightVerticalData);
-    BTSerial.print(",");
-    BTSerial.print(rightTriggerData);
-    BTSerial.print(",");
-    BTSerial.print(a);
-    BTSerial.print(",");
-    BTSerial.print(b);
-    BTSerial.print(",");
-    BTSerial.print(y);
-    BTSerial.print(",");
-    BTSerial.print(x);
-    BTSerial.println();
-
-    if (serialPrintValues == true)
-    {
-      Serial.print("#");
-      Serial.print(thumbstickRightHorizontalData);
-      Serial.print(",");
-      Serial.print(thumbstickRightVerticalData);
-      Serial.print(",");
-      Serial.print(rightTriggerData);
-      Serial.print(",");
-      Serial.print(a);
-      Serial.print(",");
-      Serial.print(b);
-      Serial.print(",");
-      Serial.print(y);
-      Serial.print(",");
-      Serial.print(x);
-      Serial.println();
-    }
-
-  }//end sendReady if
+  
 
   if(calibrateThumbSticks == 1)
   {
